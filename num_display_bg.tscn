@@ -1,0 +1,12 @@
+[gd_scene load_steps=4 format=3 uid="uid://c7ojd23f1fbkt"]
+
+[ext_resource type="Texture2D" uid="uid://c1m7hh58uyija" path="res://textures/beta/number_display/num_display_bg.png" id="1_7mi3a"]
+[ext_resource type="Script" path="res://num_panel.gd" id="2_a3vce"]
+[ext_resource type="Script" path="res://test.gd" id="3_hcl0t"]
+
+[node name="num_display_bg" type="Sprite2D"]
+texture = ExtResource("1_7mi3a")
+script = ExtResource("2_a3vce")
+
+[node name="num_display" type="Sprite2D" parent="."]
+script = ExtResource("3_hcl0t")
