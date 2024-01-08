@@ -23,25 +23,25 @@ func _ready():
 func change_texture(digit) -> void:
 	print(digit)
 	match digit:
-		0:
+		"0":
 			texture = sprite_zero
-		1:
+		"1":
 			texture = sprite_one
-		2:
-			texture = sprite_two
-		3:
+		"2":
+			texture = sprite_two 
+		"3":
 			texture = sprite_three
-		4:
+		"4":
 			texture = sprite_four
-		5:
+		"5":
 			texture = sprite_five
-		6:
+		"6":
 			texture = sprite_six
-		7:
+		"7":
 			texture = sprite_seven
-		8:
+		"8":
 			texture = sprite_eight
-		9:
+		"9":
 			texture = sprite_nine
 		"lose":
 			texture = sprite_eye
