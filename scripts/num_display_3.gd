@@ -15,17 +15,17 @@ const sprite_eye = preload("res://textures/beta/number_display/num_eye.png")
 const sprite_mouth = preload("res://textures/beta/number_display/num_mouth.png")
 
 func _ready():
-	
-	position = Vector2i(32, 0)
-	get_parent().digit_1.connect(change_texture)
+
+	position = Vector2i(-32, 0)
+	get_parent().digit_3.connect(change_texture)
 
 
 func change_texture(digit) -> void:
 	print(digit)
 	match digit:
-		"0":
+		0:
 			texture = sprite_zero
-		"1":
+		1:
 			texture = sprite_one
 		2:
 			texture = sprite_two

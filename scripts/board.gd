@@ -88,8 +88,6 @@ func _ready():
 		get_parent().p1_tile_uncovered.connect(pass_opponent_tile_uncovered)
 
 	set_position(Vector2i(64 * board_width * (player_number), 0))
-	
-	get_parent().p2
 
 	make_board()
 	mine_coords = get_parent().mine_coords

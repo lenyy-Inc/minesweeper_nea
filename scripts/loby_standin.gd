@@ -41,7 +41,7 @@ func place_mines() -> void:
 
 func tile_uncovered(player_num) -> void:
 
-	if player_num == 0
+	if player_num == 0:
 		p1_tile_uncovered.emit()
 		return
 	p2_tile_uncovered.emit()
@@ -50,7 +50,7 @@ func game_end(loser_player_num) -> void:
 
 	print("player %d loss" % (loser_player_num + 1))
 
-func save_input(input_owner_player_number, input)
+func save_input(input_owner_player_number, input) -> void:
 	var input_owner = players[input_owner_player_number]
 
 func add_player() -> void:
