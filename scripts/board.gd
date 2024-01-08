@@ -28,6 +28,8 @@ const spritesheet_grid_top:= Vector2i(1, 3)
 const spritesheet_top:= Vector2i(2, 3)
 
 signal lose
+signal input
+signal tile_uncovered
 
 			
 func make_board() -> void:
@@ -83,15 +85,18 @@ func _ready():
 	
 	var child_grid = preload("res://scenes/minesweeper_grid.tscn").instantiate()
 	add_child(child_grid) 
-	child_grid.lose.connect(pass_loss)
+	child_grid.lose.connect(pass_lose)
 	child_grid.input.connect(pass_input)
-	child_grid.tile_uncovered.connect(pass_loss)
+	child_grid.tile_uncovered.connect(pass_tile_uncovered)
 
-func pass_input():
-	pass
+func pass_tile_uncovered() -> void:
+	tile_uncovered.emit()
 
-func pass_loss() -> void:
-	lose.emit()
+func pass_input(event) -> void:
+	input.emit(event)
+
+func pass_lose() -> void:
+	lose.emit(player_number)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

@@ -35,20 +35,16 @@ func place_mines() -> void:
 			
 			
 		mine_coords.append(grid[x][y])
-func p1_loss() -> void:
-	print("p1_loss")
-	
-func p2_loss() -> void:
-	print("p2_loss")
+
+func game_end(loser_player_num) -> void:
+
+	print("player %d loss" % (loser_player_num + 1))
 
 func add_player() -> void:
-	
+
 	players.append(player.instantiate())
 	add_child(players[player_number])
-	if player_number == 0:
-		players[player_number].lose.connect(p1_loss)
-	if player_number == 1:
-		players[player_number].lose.connect(p2_loss)
+	players[player_number].lose.connect(game_end)
 	player_number += 1
 
 func _ready():

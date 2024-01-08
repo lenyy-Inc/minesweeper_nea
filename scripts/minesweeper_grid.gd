@@ -195,9 +195,6 @@ func left_click_handler(tile_coordinate : Vector2i) -> void:
 	
 	if is_clear(tile_coordinate):
 		recursive_clear(tile_coordinate)
-		
-	
-	
 
 func _input(event):
 	
