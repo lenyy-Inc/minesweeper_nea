@@ -50,6 +50,7 @@ func make_board() -> void:
 	
 	#set rows of same tiles
 	for i in range(1, board_width - 1):
+		
 		set_cell(0, Vector2i(i, 0), beta_tile_id, spritesheet_top)
 		set_cell(0, Vector2i(i, board_height - 1), beta_tile_id, spritesheet_bottom)
 		set_cell(0, Vector2i(i, 1), beta_tile_id, spritesheet_space)
@@ -57,11 +58,13 @@ func make_board() -> void:
 	
 	#set columns of same tiles
 	for i in range(3, board_height - 1):
+
 		set_cell(0, Vector2i(0, i), beta_tile_id, spritesheet_grid_left)
 		set_cell(0, Vector2i(board_width - 1, i), beta_tile_id, spritesheet_grid_right)
 		
 	for i in range(1, board_width - 1):
 		for j in range(3, board_height - 1):
+
 			set_cell(0, Vector2i(i, j), beta_tile_id, spritesheet_grid_space)
 	
 
@@ -76,10 +79,18 @@ func _ready():
 	board_width= grid_width + 2
 	
 	if player_number == 0:
+
 		get_window().size = Vector2i(64 * board_width * 2, 64 * board_height)
-	
+		get_parent().p2_tile_uncovered.connect(pass_opponent_tile_uncovered)
+
+	else:
+		
+		get_parent().p1_tile_uncovered.connect(pass_opponent_tile_uncovered)
+
 	set_position(Vector2i(64 * board_width * (player_number), 0))
 	
+	get_parent().p2
+
 	make_board()
 	mine_coords = get_parent().mine_coords
 	
@@ -90,13 +101,16 @@ func _ready():
 	child_grid.tile_uncovered.connect(pass_tile_uncovered)
 
 func pass_tile_uncovered() -> void:
-	tile_uncovered.emit()
+	tile_uncovered.emit(player_number)
 
 func pass_input(event) -> void:
-	input.emit(event)
+	input.emit(player_number, event)
 
 func pass_lose() -> void:
 	lose.emit(player_number)
+
+func pass_opponent_tile_uncovered() -> void:
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

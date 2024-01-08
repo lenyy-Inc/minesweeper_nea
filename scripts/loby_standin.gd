@@ -10,6 +10,9 @@ var players:= []
 
 var mine_coords:= []
 
+signal p1_tile_uncovered
+signal p2_tile_uncovered
+
 func has_mine(coordinates) -> bool:
 	
 	return mine_coords.has(coordinates)
@@ -36,15 +39,27 @@ func place_mines() -> void:
 			
 		mine_coords.append(grid[x][y])
 
+func tile_uncovered(player_num) -> void:
+
+	if player_num == 0
+		p1_tile_uncovered.emit()
+		return
+	p2_tile_uncovered.emit()
+
 func game_end(loser_player_num) -> void:
 
 	print("player %d loss" % (loser_player_num + 1))
+
+func save_input(input_owner_player_number, input)
+	var input_owner = players[input_owner_player_number]
 
 func add_player() -> void:
 
 	players.append(player.instantiate())
 	add_child(players[player_number])
 	players[player_number].lose.connect(game_end)
+	players[player_number].tile_uncovered.connect(tile_uncovered)
+	players[player_number].input.connect(save_input)
 	player_number += 1
 
 func _ready():
