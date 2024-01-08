@@ -22,7 +22,7 @@ const spritesheet_clear_tile:= Vector2i(5, 1)
 var grid:= []
 
 signal lose
-signal flag_altered
+signal tile_uncovered
 signal input
 
 func initialise_variables() -> void:
@@ -139,7 +139,7 @@ func _ready():
 
 	make_cover()
 	
-func right_click_handler(tile_coordinate : Vector2i) -> void:
+func right_click_handler(tile_coordinate: Vector2i) -> void:
 
 	print(tile_coordinate)
 
@@ -147,18 +147,22 @@ func right_click_handler(tile_coordinate : Vector2i) -> void:
 		
 		if !(has_tile_type(tile_coordinate, flag_layer_index,  spritesheet_flag)):
 			
-			flag_altered.emit()
 			set_cell(flag_layer_index, tile_coordinate, beta_tiles_id, spritesheet_flag)
 
 		else:
 			
-			flag_altered.emit()
 			erase_cell(flag_layer_index, tile_coordinate)
 		
 
-func is_clear(tile_coordinate : Vector2i) -> bool:
+func is_clear(tile_coordinate: Vector2i) -> bool:
 	
 	return get_cell_atlas_coords(numbers_layer_index, tile_coordinate) == spritesheet_clear_tile
+
+#to make sure that when a tile is manually uncovered it emits signal
+func uncover_tile(coordinate: Vector2i) -> void:
+	
+	tile_uncovered.emit()
+	erase_cell(cover_layer_index, coordinate)
 
 #recursive function that clears around all adjacent clear cells
 func recursive_clear(tile_coordinate) -> void:
@@ -167,7 +171,7 @@ func recursive_clear(tile_coordinate) -> void:
 		
 		if (has_tile_type(adjacent_tile, cover_layer_index, spritesheet_cover)):
 			 
-			erase_cell(cover_layer_index, adjacent_tile)
+			uncover_tile(adjacent_tile)
 			erase_cell(flag_layer_index, adjacent_tile)
 			if is_clear(adjacent_tile):
 				
@@ -180,7 +184,7 @@ func left_click_handler(tile_coordinate : Vector2i) -> void:
 		print("no")
 		return
 	
-	erase_cell(cover_layer_index, tile_coordinate)
+	uncover_tile(tile_coordinate)
 	
 	if has_tile_type(tile_coordinate, mine_layer_index, spritesheet_mine):
 		

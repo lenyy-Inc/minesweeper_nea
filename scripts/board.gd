@@ -83,13 +83,16 @@ func _ready():
 	
 	var child_grid = preload("res://scenes/minesweeper_grid.tscn").instantiate()
 	add_child(child_grid) 
-	child_grid.lose.connect(tell_lobby_loss)
-	child_grid.input.connect(tell_lobby_loss)
-	child_grid.flag_altered.connect(tell_lobby_loss)
+	child_grid.lose.connect(pass_loss)
+	child_grid.input.connect(pass_input)
+	child_grid.tile_uncovered.connect(pass_loss)
 
-func tell_lobby_loss() -> void:
-	
+func pass_input():
+	pass
+
+func pass_loss() -> void:
 	lose.emit()
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
