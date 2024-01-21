@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7voer0t57syr"]
-
-[ext_resource type="PackedScene" uid="uid://b7a18687kdot8" path="res://scenes/lobby_standin.tscn" id="1_i6waj"]
-
-[node name="lobby_standin" instance=ExtResource("1_i6waj")]

@@ -21,12 +21,13 @@ func _process(delta):
 
 	time_elapsed += delta
 	var digits:= [0, 0, 0]
-	var count = 2
+	var count = 0
 	var stringdigits:= str(int(time_elapsed))
-	for i in stringdigits:
-		
-	for i in digits:
-		print(i)
+
+	for i in range(stringdigits.length() - 1, -1, -1):
+		digits[count] = stringdigits[i]
+		count += 1
+
 	digit_1.emit(digits[0])
 	digit_2.emit(digits[1])
 	digit_3.emit(digits[2])
