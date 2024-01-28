@@ -110,6 +110,6 @@ func pass_lose() -> void:
 func pass_opponent_tile_uncovered() -> void:
 	pass
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+
 func _process(delta):
 	pass

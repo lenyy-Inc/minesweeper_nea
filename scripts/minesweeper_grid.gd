@@ -7,7 +7,6 @@ const beta_tiles_id: int = 0
 var mine_number: int 
 var grid_width: int 
 var grid_height: int 
-var tile_scale: float
 
 const mine_layer_index: int = 1
 const numbers_layer_index: int = 2
