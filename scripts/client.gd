@@ -3,8 +3,9 @@ extends Node
 enum Data{
 
 	join_queue,
-	id,
+	user_id,
 	wait,
+	lobby_id,
 	match_data,
 
 }
@@ -15,55 +16,41 @@ enum Modes{
 	medium,
 	large,
 	custom,
+	default,
 
 }
 
-var mine_coords:= []
 
 var window = JavaScriptBridge.get_interface("window")
 var peer = WebSocketMultiplayerPeer.new()
-var id = 0 
+var user_id = 0
+var lobby_id = 0
 
+#get from database
+
+var elo: int = 100 #default value
 
 #gotten from javascript
-var elo: int = 0
-var username: String = window.username
-var game_mode = window.game_mode
 
+var username: String = "guest"
+var game_mode = Modes.default
 
 var mine_number: int 
 var grid_width: int 
 var grid_height: int 
 
-func has_mine(coordinates) -> bool:
-	
-	return mine_coords.has(coordinates)
-
-func place_mines() -> void:
-	
-	var grid:= []
-	for i in grid_width:
-		grid.append([])
-		for j in grid_height:
-			grid[i].append(Vector2i(i, j))
-			
-	var x: int
-	var y: int 	
-	for i in mine_number:
-		
-		x = randi_range(0, grid_width - 1)
-		y= randi_range(0, grid_height - 1)
-		
-		while has_mine(grid[x][y]):
-			x = randi_range(0, grid_width - 1)
-			y = randi_range(0, grid_height - 1)
 
 func _ready():
 
+	game_mode = window.game_mode
+	username = window.username
 	get_board_dimensions_from_mode()
+
+
+
+func initialise_game() -> void:
 	var child_board = preload("res://scenes/minesweeper_board.tscn").instantiate()
 	add_child(child_board)
-
 
 func get_board_dimensions_from_mode() -> void:
 
@@ -99,6 +86,8 @@ func _process(delta):
 
 	peer.poll()
 	
+	#check for updated elo
+
 	if peer.get_available_packet_count() > 0:
 
 		var packet = peer.get_packet()
@@ -106,12 +95,27 @@ func _process(delta):
 		if packet != null:
 
 			var data = JSON.parse_string(packet.get_string_from_utf8())
-
 			print(data)
-			if data.data_type == Data.id:
-				id = data.id
-				print("my id is " + str(id))
-				join_matchmaking()
+
+
+func handle_data(data):
+
+	match data:
+
+		Data.user_id:
+
+			user_id = data.id
+			print("my id is " + str(user_id))
+			join_matchmaking()
+
+		Data.lobby_id:
+
+			lobby_id = data.id
+
+		Data.wait:
+		
+			pass
+
 
 func join_matchmaking() -> void:
 
