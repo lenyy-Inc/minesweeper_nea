@@ -55,7 +55,7 @@ func _process(delta):
 			handle_data(data)
 	
 	
-	if users.size() >= 2:
+	if matchmaking.size() >= 2:
 		matchmake()
 		
 
@@ -80,16 +80,21 @@ func handle_data(data):
 	print("server handling")
 
 	var data_type: int = data["data_type"]
+	var int_elo: int 
+	var int_id: int
 
-	match data["data_type"]:
+	match data_type:
 
 		Data.join_queue:
 
-			print("placed into matchmaking")
-			matchmaking[data.id] = {
+			int_elo = data["elo"]
+			int_id = data["id"]
 
-			"id" : data.id,
-			"elo" : data.elo,
+			print("placed into matchmaking")
+			matchmaking[int_id] = {
+
+			"id" : int_id,
+			"elo" : int_elo,
 			"current_opponent" : null,
 			"current_elo_gap" : null,
 			"time_waited" : 0,
@@ -99,11 +104,13 @@ func handle_data(data):
 			var extra_user_data = {
 
 			"username" : data.username,
-			"elo" : data.elo,
+			"elo" : int_elo,
 
 			}
 
-			users[data.id].merge(extra_user_data)
+			print(users[int_id])
+
+			users[int_id].merge(extra_user_data)
 		
 		_:
 
@@ -112,10 +119,13 @@ func handle_data(data):
 
 func is_better_match(candidate_1, candidate_2, elo_difference) -> bool:
 
-	if candidate_1["current_elo_gap"] <= elo_difference:
-		return false
-	if candidate_2["current_elo_gap"] <= elo_difference:
-		return false
+	if not candidate_1["current_elo_gap"] == null:
+		if candidate_1["current_elo_gap"] <= elo_difference:
+			return false
+
+	if not candidate_2["current_elo_gap"] == null:
+		if candidate_2["current_elo_gap"] <= elo_difference:
+			return false
 
 	return true
 
@@ -130,14 +140,13 @@ func matchmake() -> void:
 	in_matchmaking = matchmaking.keys()
 
 	for i in range(0, in_matchmaking.size() - 1):
-		print("range not issue")
 		for j in range(i + 1, in_matchmaking.size()):
 
-			print("please")
+
 			var candidate_1 = matchmaking[in_matchmaking[i]]
-			print(str(candidate_1))
+
 			var candidate_2 = matchmaking[in_matchmaking[j]]
-			print(str(candidate_1))
+
 
 			elo_difference = candidate_1["elo"] - candidate_2["elo"]
 			difference_lenience = 5 * (candidate_1["time_waited"] + 1) * (candidate_2["time_waited"] + 1)
@@ -154,15 +163,15 @@ func matchmake() -> void:
 		
 	for key in in_matchmaking:
 
-		var user = matchmaking[key]
-
-		if not matchmaking.has[user]:
+		if not matchmaking.has(key):
 			continue
+
+		var user = matchmaking[key]
 
 		if (user["current_opponent"] == null):
 			continue
 
-		if not matchmaking.has[user["current_opponent"]]:
+		if not matchmaking.has(user["current_opponent"]):
 			user["current_opponent"] = null
 			continue
 
@@ -177,7 +186,7 @@ func matchmake() -> void:
 
 func create_new_lobby(player_1_id, player_2_id) -> void:
 
-	var new_lobby_id:= generate_random_id()
+	var new_lobby_id: int = generate_random_id()
 	var player_1 = users[player_1_id]
 	var player_2 = users[player_2_id]
 
@@ -192,6 +201,8 @@ func create_new_lobby(player_1_id, player_2_id) -> void:
 	player_1["lobby"] = new_lobby_id 
 	player_2["lobby"] = new_lobby_id 
 
+	print("new lobby id: " + str(new_lobby_id))
+
 	var send_lobby = {
 
 		"data_type" : Data.lobby_id,
@@ -202,16 +213,21 @@ func create_new_lobby(player_1_id, player_2_id) -> void:
 	peer.get_peer(player_1["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
 	peer.get_peer(player_2["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
 
-	matchmaking.erase[player_1_id]
-	matchmaking.erase[player_2_id]
+	print(player_1_id)
+	print(player_2_id)
 
-func generate_random_id() -> String:
+	matchmaking.erase(player_1_id)
+	matchmaking.erase(player_2_id)
+
+func generate_random_id() -> int:
 
 	var rng = RandomNumberGenerator.new()
 
-	var id:= ""
-	for i in range(0, 15):
-		id += str(rng.randi_range(0, 9))
+	var id_string = ""
+	for i in range(0, 9):
+		id_string  += str(rng.randi_range(0, 9))
+
+	var id: int = int(id_string)
 
 	return id
 

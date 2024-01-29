@@ -22,8 +22,8 @@ enum Modes{
 
 #var window = JavaScriptBridge.get_interface("window")
 var peer = WebSocketMultiplayerPeer.new()
-var user_id = 12
-var lobby_id = 13
+var user_id: int = 12
+var lobby_id: int = 13
 
 #get from database
 
@@ -108,35 +108,32 @@ func _process(delta):
 
 func handle_data(data):
 
-	print("client handling")
-
-	print("data data_type " + str(data["data_type"]))
-	print("Data.user_id " + str(Data.user_id))
-	print(str(data["data_type"] == Data.user_id))
-
 	var data_type: int = data["data_type"]
-
-	#match statement is buggy with enums and parsed jsons, so i just use if statments here
+	var int_elo: int
+	var int_id: int
 
 	match data_type:
 
 		Data.user_id:
 
-			print("got here")
-			user_id = data.id
+			int_id = data["id"]
+			user_id = int_id
 			print("my id is " + str(user_id))
 			join_matchmaking()
 			
 
 		Data.lobby_id:
 
-			lobby_id = "data.id"
+			int_id = data["id"]
+			lobby_id = int_id
+			print("my lobby id is " + str(lobby_id) + " and user id is " + str(user_id))
 			
 
 		Data.wait:
 
-			print("waited" + str(data["data"]))
-		
+			#print("waited" + str(data["data"]))
+			pass
+
 		_:
 
 			print("nothing matched client")
@@ -154,14 +151,15 @@ func join_matchmaking() -> void:
 
 	print("joining matchmaking")
 
-	var data = {
+	var join_matchmaking_request = {
 
 		"data_type" : Data.join_queue,
 		"username" : "test",
 		"elo" : elo,
+		"id" : user_id,
 
 	}
-	peer.put_packet(JSON.stringify(data).to_utf8_buffer())
+	peer.put_packet(JSON.stringify(join_matchmaking_request).to_utf8_buffer())
 
 func connect_to_server() -> void:
 
