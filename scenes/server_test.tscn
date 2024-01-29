@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://tvq37vhsns4o"]
 
-[ext_resource type="Script" path="res://scripts/Client.gd" id="1_pw48l"]
-[ext_resource type="Script" path="res://scripts/Server.gd" id="2_sgval"]
+[ext_resource type="Script" path="res://scripts/client.gd" id="1_07wxa"]
+[ext_resource type="Script" path="res://scripts/server.gd" id="2_sx8c0"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -12,10 +12,10 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Client" type="Node" parent="."]
-script = ExtResource("1_pw48l")
+script = ExtResource("1_07wxa")
 
 [node name="Server" type="Node" parent="."]
-script = ExtResource("2_sgval")
+script = ExtResource("2_sx8c0")
 
 [node name="start_client" type="Button" parent="."]
 layout_mode = 0
@@ -42,15 +42,6 @@ offset_right = 457.0
 offset_bottom = 141.0
 text = "send_test_packet"
 
-[node name="Button" type="Button" parent="."]
-layout_mode = 0
-offset_left = 247.0
-offset_top = 150.0
-offset_right = 455.0
-offset_bottom = 265.0
-text = "send_test_packet_from_serer"
-
 [connection signal="button_down" from="start_client" to="Client" method="_on_start_client_button_down"]
 [connection signal="button_down" from="start_server" to="Server" method="_on_start_server_button_down"]
 [connection signal="button_down" from="send_test_packet" to="Client" method="_on_send_test_packet_button_down"]
-[connection signal="button_down" from="Button" to="Server" method="_on_button_button_down"]

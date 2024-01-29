@@ -10,18 +10,10 @@ enum Data{
 
 }
 
-
-
 var lobbies:= {}
 var users:= {}
 var matchmaking:= {}
 var peer = WebSocketMultiplayerPeer.new()
-
-const wait_message ={
-
-	"data_type" : Data.wait,
-
-}
 
 func place_mines(grid_height, grid_width, mine_number) -> Array:
 
@@ -62,22 +54,38 @@ func _process(delta):
 			var data = JSON.parse_string(packet.get_string_from_utf8())
 			handle_data(data)
 	
-	matchmake()
+	
+	if users.size() >= 2:
+		matchmake()
+		
 
 	var ids:= matchmaking.keys()
 	for id in ids:
-		matchmaking[id]["time_waited"]
-		peer.get_peer(id).put_packet((JSON.stringify(wait_message.merge()).to_utf8_buffer()))
+		
+		matchmaking[id]["time_waited"] += delta
 
-				
+		var wait_message = {
+
+			"data_type" : Data.wait,
+			"data" : matchmaking[id]["time_waited"],
+
+		}
+	
+		peer.get_peer(id).put_packet((JSON.stringify(wait_message).to_utf8_buffer()))
+	
 
 
 func handle_data(data):
 
-	match data:
+	print("server handling")
+
+	var data_type: int = data["data_type"]
+
+	match data["data_type"]:
 
 		Data.join_queue:
 
+			print("placed into matchmaking")
 			matchmaking[data.id] = {
 
 			"id" : data.id,
@@ -96,6 +104,10 @@ func handle_data(data):
 			}
 
 			users[data.id].merge(extra_user_data)
+		
+		_:
+
+			print("nothing matched server")
 
 
 func is_better_match(candidate_1, candidate_2, elo_difference) -> bool:
@@ -109,21 +121,28 @@ func is_better_match(candidate_1, candidate_2, elo_difference) -> bool:
 
 func matchmake() -> void:
 
+
 	var in_matchmaking:= []
 	var match_conditions: bool 
 	var difference_lenience: int
 	var elo_difference: int
 
 	in_matchmaking = matchmaking.keys()
-	
-	for i in range(0, in_matchmaking.size() - 2):
-		for j in range(i + 1, in_matchmaking.size() - 1):
 
+	for i in range(0, in_matchmaking.size() - 1):
+		print("range not issue")
+		for j in range(i + 1, in_matchmaking.size()):
+
+			print("please")
 			var candidate_1 = matchmaking[in_matchmaking[i]]
+			print(str(candidate_1))
 			var candidate_2 = matchmaking[in_matchmaking[j]]
+			print(str(candidate_1))
 
 			elo_difference = candidate_1["elo"] - candidate_2["elo"]
 			difference_lenience = 5 * (candidate_1["time_waited"] + 1) * (candidate_2["time_waited"] + 1)
+			if difference_lenience > 100:
+				difference_lenience = 100
 			match_conditions = elo_difference <= difference_lenience
 
 			if match_conditions and is_better_match(candidate_1, candidate_2, elo_difference):
@@ -220,6 +239,7 @@ func peer_connected(id) -> void:
 
 	}
 	peer.get_peer(id).put_packet((JSON.stringify(send_id).to_utf8_buffer()))
+	print("id should be sent")
 	
 	users[id] = {
 

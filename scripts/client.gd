@@ -20,11 +20,10 @@ enum Modes{
 
 }
 
-
-var window = JavaScriptBridge.get_interface("window")
+#var window = JavaScriptBridge.get_interface("window")
 var peer = WebSocketMultiplayerPeer.new()
-var user_id = 0
-var lobby_id = 0
+var user_id = 12
+var lobby_id = 13
 
 #get from database
 
@@ -42,14 +41,16 @@ var grid_height: int
 
 func _ready():
 
-	game_mode = window.game_mode
-	username = window.username
-	get_board_dimensions_from_mode()
+	#game_mode = window.game_mode
+	#username = window.username
+	pass
 
 
 
 func initialise_game() -> void:
-	var child_board = preload("res://scenes/minesweeper_board.tscn").instantiate()
+
+	get_board_dimensions_from_mode()
+	var child_board = preload("res://scenes/minesweeper_tiled_board.tscn").instantiate()
 	add_child(child_board)
 
 func get_board_dimensions_from_mode() -> void:
@@ -76,10 +77,16 @@ func get_board_dimensions_from_mode() -> void:
 
 		Modes.custom:
 
-			mine_number = window.mine_number
-			grid_height = window.grid_height
-			grid_width = window.grid_width
-	
+			#mine_number = window.mine_number
+			#grid_height = window.grid_height
+			#grid_width = window.grid_width
+			pass
+
+		Modes.default:
+
+			mine_number = 10
+			grid_height = 10
+			grid_width = 10
 
 
 func _process(delta):
@@ -95,35 +102,63 @@ func _process(delta):
 		if packet != null:
 
 			var data = JSON.parse_string(packet.get_string_from_utf8())
-			print(data)
+
+			handle_data(data)
 
 
 func handle_data(data):
 
-	match data:
+	print("client handling")
+
+	print("data data_type " + str(data["data_type"]))
+	print("Data.user_id " + str(Data.user_id))
+	print(str(data["data_type"] == Data.user_id))
+
+	var data_type: int = data["data_type"]
+
+	#match statement is buggy with enums and parsed jsons, so i just use if statments here
+
+	match data_type:
 
 		Data.user_id:
 
+			print("got here")
 			user_id = data.id
 			print("my id is " + str(user_id))
 			join_matchmaking()
+			
 
 		Data.lobby_id:
 
-			lobby_id = data.id
+			lobby_id = "data.id"
+			
 
 		Data.wait:
+
+			print("waited" + str(data["data"]))
 		
-			pass
+		_:
+
+			print("nothing matched client")
+
+func print_status(caller : String):
+
+	print("called by" + str(caller))
+	print("my id" + str(user_id))
+	print("lobby id" + str(lobby_id))
+
+
 
 
 func join_matchmaking() -> void:
+
+	print("joining matchmaking")
 
 	var data = {
 
 		"data_type" : Data.join_queue,
 		"username" : "test",
-		"elo" : elo
+		"elo" : elo,
 
 	}
 	peer.put_packet(JSON.stringify(data).to_utf8_buffer())

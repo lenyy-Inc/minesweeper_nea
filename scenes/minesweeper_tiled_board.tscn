@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://yxjvrnkbfaoi"]
 
 [ext_resource type="Texture2D" uid="uid://cgb4c2kwf5o83" path="res://textures/beta/board/spritesheet_board.png" id="1_hr13e"]
-[ext_resource type="Script" path="res://scripts/board.gd" id="2_gdoa6"]
+[ext_resource type="Script" path="res://scripts/minesweeper_tiled_board.gd" id="2_2r8ta"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v0j88"]
 texture = ExtResource("1_hr13e")
@@ -32,4 +32,4 @@ position = Vector2(384, 448)
 tile_set = SubResource("TileSet_rjqiq")
 format = 2
 layer_0/name = "board"
-script = ExtResource("2_gdoa6")
+script = ExtResource("2_2r8ta")

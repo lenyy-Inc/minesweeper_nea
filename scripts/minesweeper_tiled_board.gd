@@ -9,6 +9,7 @@ var board_width: int
 var mine_coords:= []
 
 const beta_tile_id: int = 1
+const tile_size_px:int = 64
 
 #making sprites easier to work with
 const spritesheet_space:= Vector2i(0, 0)
@@ -80,14 +81,14 @@ func _ready():
 	
 	if player_number == 0:
 
-		get_window().size = Vector2i(64 * board_width * 2, 64 * board_height)
+		get_window().size = Vector2i(tile_size_px * board_width * 2, tile_size_px * board_height)
 		get_parent().p2_tile_uncovered.connect(pass_opponent_tile_uncovered)
 
 	else:
 		
 		get_parent().p1_tile_uncovered.connect(pass_opponent_tile_uncovered)
 
-	set_position(Vector2i(64 * board_width * (player_number), 0))
+	set_position(Vector2i(tile_size_px * board_width * (player_number), 0))
 
 	make_board()
 	mine_coords = get_parent().mine_coords
