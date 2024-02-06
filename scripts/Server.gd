@@ -10,6 +10,15 @@ enum Data{
 
 }
 
+
+enum Match_Data{
+
+	win,
+	loss,
+	tile_uncovered,
+
+}
+
 var lobbies:= {}
 var users:= {}
 var matchmaking:= {}
@@ -71,9 +80,32 @@ func _process(delta):
 
 		}
 	
-		peer.get_peer(id).put_packet((JSON.stringify(wait_message).to_utf8_buffer()))
+		send_data_as_JSON(id, wait_message)
+		#peer.get_peer(id).put_packet((JSON.stringify(wait_message).to_utf8_buffer()))
 	
+func handle_match_data(data):
 
+	var data_type: int = data["data_type"]
+	var int_elo: int
+	var int_id: int
+
+	match data_type:
+
+		Match_Data.win:
+
+			pass
+
+		Match_Data.loss:
+
+			pass
+
+		Match_Data.tile_uncovered:
+
+			pass
+
+		_:
+
+			print("match_handler: nothing matched client")
 
 func handle_data(data):
 
@@ -181,7 +213,6 @@ func matchmake() -> void:
 
 			create_new_lobby(user["id"], user_chosen_opponent["id"])
 
-		
 
 
 func create_new_lobby(player_1_id, player_2_id) -> void:
@@ -210,8 +241,10 @@ func create_new_lobby(player_1_id, player_2_id) -> void:
 
 	}
 
-	peer.get_peer(player_1["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
-	peer.get_peer(player_2["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
+	send_data_as_JSON(player_1["id"], send_lobby)
+	send_data_as_JSON(player_2["id"], send_lobby)
+	#peer.get_peer(player_1["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
+	#peer.get_peer(player_2["id"]).put_packet((JSON.stringify(send_lobby).to_utf8_buffer()))
 
 	print(player_1_id)
 	print(player_2_id)
@@ -231,6 +264,9 @@ func generate_random_id() -> int:
 
 	return id
 
+
+func send_data_as_JSON(recipient_id, data) -> void:
+	peer.get_peer(recipient_id).put_packet((JSON.stringify(data).to_utf8_buffer()))
 
 func start_server() -> void:
 
@@ -254,7 +290,10 @@ func peer_connected(id) -> void:
 		"id" : id,
 
 	}
-	peer.get_peer(id).put_packet((JSON.stringify(send_id).to_utf8_buffer()))
+
+	send_data_as_JSON(id, send_id)
+	#peer.get_peer(id).put_packet((JSON.stringify(send_id).to_utf8_buffer()))
+
 	print("id should be sent")
 	
 	users[id] = {

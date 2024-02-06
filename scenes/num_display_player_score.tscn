@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3 uid="uid://byx0gf4ultshe"]
+
+[ext_resource type="Texture2D" uid="uid://c1m7hh58uyija" path="res://textures/beta/number_display/num_display_bg.png" id="1_lwhlw"]
+[ext_resource type="Script" path="res://scripts/num_display_player_score_bg.gd" id="2_jyda3"]
+[ext_resource type="Texture2D" uid="uid://clirng8x2a21u" path="res://textures/beta/number_display/num_zero.png" id="3_n2h70"]
+[ext_resource type="Script" path="res://scripts/num_display_1.gd" id="4_bxf21"]
+[ext_resource type="Script" path="res://scripts/num_display_2.gd" id="5_2rlxu"]
+[ext_resource type="Script" path="res://scripts/num_display_3.gd" id="6_2iiqc"]
+
+[node name="num_display_player_score_bg" type="Sprite2D"]
+position = Vector2(283, 214)
+texture = ExtResource("1_lwhlw")
+script = ExtResource("2_jyda3")
+
+[node name="num_display_1" type="Sprite2D" parent="."]
+texture = ExtResource("3_n2h70")
+script = ExtResource("4_bxf21")
+
+[node name="num_display_2" type="Sprite2D" parent="."]
+texture = ExtResource("3_n2h70")
+script = ExtResource("5_2rlxu")
+
+[node name="num_display_3" type="Sprite2D" parent="."]
+texture = ExtResource("3_n2h70")
+script = ExtResource("6_2iiqc")

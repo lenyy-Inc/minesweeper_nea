@@ -16,6 +16,7 @@ const sprite_mouth = preload("res://textures/beta/number_display/num_mouth.png")
 
 func _ready():
 
+	modulate = get_parent().child_colour
 	position = Vector2i(32, 0)
 	get_parent().digit_1.connect(change_texture)
 

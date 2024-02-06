@@ -190,6 +190,7 @@ func left_click_handler(tile_coordinate : Vector2i) -> void:
 		lose.emit()
 		clear_layer(cover_layer_index)
 		clear_layer(flag_layer_index)
+		
 		return
 	
 	if is_clear(tile_coordinate):

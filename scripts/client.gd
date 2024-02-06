@@ -10,6 +10,14 @@ enum Data{
 
 }
 
+enum Match_Data{
+
+	win,
+	loss,
+	tile_uncovered,
+
+}
+
 enum Modes{
 
 	small,
@@ -22,6 +30,9 @@ enum Modes{
 
 #var window = JavaScriptBridge.get_interface("window")
 var peer = WebSocketMultiplayerPeer.new()
+
+#gotten from server
+var player_number: int = -1
 var user_id: int = 12
 var lobby_id: int = 13
 
@@ -34,24 +45,84 @@ var elo: int = 100 #default value
 var username: String = "guest"
 var game_mode = Modes.default
 
-var mine_number: int 
-var grid_width: int 
-var grid_height: int 
+var mine_coords:= []
+var mine_number: int = 10
+var grid_width: int = 10
+var grid_height: int = 10
 
+signal win
+signal lose
+signal opponent_tile_uncovered
 
 func _ready():
 
 	#game_mode = window.game_mode
 	#username = window.username
+	initialise_game()
 	pass
 
+func send_data_as_JSON(data) -> void:
+	peer.put_packet(JSON.stringify(data).to_utf8_buffer())
 
+func join_matchmaking() -> void:
+
+	print("joining matchmaking")
+
+	var join_matchmaking_request = {
+
+		"data_type" : Data.join_queue,
+		"username" : "test",
+		"elo" : elo,
+		"id" : user_id,
+
+	}
+	send_data_as_JSON(join_matchmaking_request)
+	#peer.put_packet(JSON.stringify(join_matchmaking_request).to_utf8_buffer())
+
+func send_win() -> void:
+
+	var win_data = {
+
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.tile_uncovered,
+
+	}
+	send_data_as_JSON(win_data)
+
+func send_tile_uncovered(number_uncovered) -> void:
+
+	var tile_uncovered_update = {
+
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.tile_uncovered,
+		"data" : number_uncovered,
+
+	}
+	send_data_as_JSON(tile_uncovered_update)
+
+func send_loss() -> void:
+
+	var loss_data = {
+
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.loss,
+		"id" : user_id,
+
+	}
+	send_data_as_JSON(loss_data)
+
+func write_demo(event):
+	pass
 
 func initialise_game() -> void:
 
 	get_board_dimensions_from_mode()
 	var child_board = preload("res://scenes/minesweeper_tiled_board.tscn").instantiate()
 	add_child(child_board)
+	child_board.lose.connect(send_loss)
+	child_board.win.connect(send_win)
+	child_board.input.connect(write_demo)
+	child_board.tile_uncovered.connect(send_tile_uncovered)
 
 func get_board_dimensions_from_mode() -> void:
 
@@ -106,10 +177,34 @@ func _process(delta):
 			handle_data(data)
 
 
-func handle_data(data):
+func handle_match_data(data):
 
 	var data_type: int = data["data_type"]
 	var int_elo: int
+	var int_id: int
+
+	match data_type:
+
+		Match_Data.win:
+
+			pass
+
+		Match_Data.loss:
+
+			pass
+
+		Match_Data.tile_uncovered:
+
+			opponent_tile_uncovered.emit()
+
+		_:
+
+			print("match_handler: nothing matched client")
+
+
+func handle_data(data):
+
+	var data_type: int = data["data_type"]
 	var int_id: int
 
 	match data_type:
@@ -134,9 +229,13 @@ func handle_data(data):
 			#print("waited" + str(data["data"]))
 			pass
 
+		Data.match_data:
+
+			handle_match_data(data)
+
 		_:
 
-			print("nothing matched client")
+			print("data_handler: nothing matched client")
 
 func print_status(caller : String):
 
@@ -145,29 +244,17 @@ func print_status(caller : String):
 	print("lobby id" + str(lobby_id))
 
 
-
-
-func join_matchmaking() -> void:
-
-	print("joining matchmaking")
-
-	var join_matchmaking_request = {
-
-		"data_type" : Data.join_queue,
-		"username" : "test",
-		"elo" : elo,
-		"id" : user_id,
-
-	}
-	peer.put_packet(JSON.stringify(join_matchmaking_request).to_utf8_buffer())
-
 func connect_to_server() -> void:
 
 	peer.create_client("ws://127.0.0.1:8915")
 	print("client_started")
 
+func pass_win() -> void:
+	win.emit()
 
-	
+func pass_lose() -> void:
+	lose.emit()
+	get_tree().paused = true
 
 func _on_start_client_button_down():
 	
@@ -184,5 +271,6 @@ func _on_send_test_packet_button_down():
 
 	}
 	#print(message)
-	var message_bytes = JSON.stringify(message).to_utf8_buffer()
-	peer.put_packet(message_bytes)
+	send_data_as_JSON(message)
+	#var message_bytes = JSON.stringify(message).to_utf8_buffer()
+	#peer.put_packet(message_bytes)

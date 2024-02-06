@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3 uid="uid://3olfdsbh2qkc"]
+
+[ext_resource type="Texture2D" uid="uid://c1m7hh58uyija" path="res://textures/beta/number_display/num_display_bg.png" id="1_slhdd"]
+[ext_resource type="Script" path="res://scripts/num_display_opponent_score_bg.gd" id="2_xv0ay"]
+[ext_resource type="Texture2D" uid="uid://clirng8x2a21u" path="res://textures/beta/number_display/num_zero.png" id="3_titov"]
+[ext_resource type="Script" path="res://scripts/num_display_1.gd" id="4_3xmgm"]
+[ext_resource type="Script" path="res://scripts/num_display_2.gd" id="5_n67uq"]
+[ext_resource type="Script" path="res://scripts/num_display_3.gd" id="6_md2st"]
+
+[node name="num_display_player_score_bg" type="Sprite2D"]
+position = Vector2(283, 214)
+texture = ExtResource("1_slhdd")
+script = ExtResource("2_xv0ay")
+
+[node name="num_display_1" type="Sprite2D" parent="."]
+texture = ExtResource("3_titov")
+script = ExtResource("4_3xmgm")
+
+[node name="num_display_2" type="Sprite2D" parent="."]
+texture = ExtResource("3_titov")
+script = ExtResource("5_n67uq")
+
+[node name="num_display_3" type="Sprite2D" parent="."]
+texture = ExtResource("3_titov")
+script = ExtResource("6_md2st")

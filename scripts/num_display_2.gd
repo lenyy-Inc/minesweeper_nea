@@ -17,6 +17,7 @@ const sprite_mouth = preload("res://textures/beta/number_display/num_mouth.png")
 
 func _ready():
 
+	modulate = get_parent().child_colour
 	position = Vector2i(0, 0)
 	get_parent().digit_2.connect(change_texture)
 
@@ -45,4 +46,4 @@ func change_texture(digit) -> void:
 		"9":
 			texture = sprite_nine
 		"lose":
-			texture = sprite_eye
+			texture = sprite_mouth
