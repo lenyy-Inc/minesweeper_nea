@@ -1,6 +1,6 @@
 extends Sprite2D
 
-var score: int
+var score: int = 0
 
 signal digit_1
 signal digit_2
@@ -13,9 +13,12 @@ func _ready():
 	get_parent().lose.connect(loss_received)
 	get_parent().opponent_tile_uncovered.connect(update_player_score)
 
-func update_player_score():
+func update_player_score(tile_number):
 
-	score += 1
+	if score >= tile_number:
+		return
+	
+	score = tile_number
 
 	var stringdigits:= str(score)
 	var digits:= [0, 0, 0]

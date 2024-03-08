@@ -1,6 +1,6 @@
 extends Sprite2D
 
-var time_elapsed: float = 990
+var time_elapsed: float = 0
 var lose_emitted: bool
 
 signal digit_1

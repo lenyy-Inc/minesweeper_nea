@@ -82,68 +82,117 @@ func _process(delta):
 	
 		send_data_as_JSON(id, wait_message)
 		#peer.get_peer(id).put_packet((JSON.stringify(wait_message).to_utf8_buffer()))
+
+func handle_win(winner_id):
 	
+	var loss_message:= {
+
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.loss,
+
+	}
+
+	send_to_other_in_lobby(winner_id, loss_message)
+
+func handle_loss(loser_id):
+
+	var win_message:= {
+
+	"data_type" : Data.match_data,
+	"match_data_type" : Match_Data.win,
+
+	}
+
+	send_to_other_in_lobby(loser_id, win_message)
+
+func send_updated_tile_uncovered(sender_id, tile_number):
+
+	var update_opponent_tile_number:= {
+
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.tile_uncovered,
+		"data" : tile_number,
+
+	}
+
+	send_to_other_in_lobby(sender_id, update_opponent_tile_number)
+
 func handle_match_data(data):
 
-	var data_type: int = data["data_type"]
-	var int_elo: int
-	var int_id: int
+	var data_type: int = data["match_data_type"]
+
 
 	match data_type:
 
 		Match_Data.win:
 
-			pass
+			var int_id: int = data["id"]
+			handle_win(int_id)
 
 		Match_Data.loss:
 
-			pass
+			var int_id: int = data["id"]
+			handle_loss(int_id)
 
 		Match_Data.tile_uncovered:
 
-			pass
+			var int_id: int = data["id"]
+			var tile_number: int = data["data"]
+			send_updated_tile_uncovered(int_id, tile_number)
 
 		_:
 
-			print("match_handler: nothing matched client")
+			print("match_handler: nothing matched server")
+
+func add_player_to_queue(data):
+
+	var int_elo: int = data["elo"]
+	var int_id: int = data["id"]
+
+	print("placed into matchmaking")
+	matchmaking[int_id] = {
+
+	"id" : int_id,
+	"elo" : int_elo,
+	"current_opponent" : null,
+	"current_elo_gap" : null,
+	"time_waited" : 0,
+
+	}
+
+	var extra_user_data = {
+
+	"username" : data.username,
+	"elo" : int_elo,
+
+	}
+
+	print(users[int_id])
+
+	users[int_id].merge(extra_user_data)
+
 
 func handle_data(data):
 
 	print("server handling")
 
 	var data_type: int = data["data_type"]
+	var int_id: int = data["id"]
 	var int_elo: int 
-	var int_id: int
+
+	#take out everythitn within the match statement into their own functions
+	#finish making networking work, in preparation for an actual test so that database stuff can begin to be incorporated
 
 	match data_type:
 
 		Data.join_queue:
 
-			int_elo = data["elo"]
-			int_id = data["id"]
+			add_player_to_queue(data)
 
-			print("placed into matchmaking")
-			matchmaking[int_id] = {
+		Data.match_data:
 
-			"id" : int_id,
-			"elo" : int_elo,
-			"current_opponent" : null,
-			"current_elo_gap" : null,
-			"time_waited" : 0,
+			handle_match_data(data)
 
-			}
-
-			var extra_user_data = {
-
-			"username" : data.username,
-			"elo" : int_elo,
-
-			}
-
-			print(users[int_id])
-
-			users[int_id].merge(extra_user_data)
-		
 		_:
 
 			print("nothing matched server")
@@ -264,6 +313,17 @@ func generate_random_id() -> int:
 
 	return id
 
+func send_to_other_in_lobby(sender_id, data) -> void:
+
+	var lobby = lobbies[users[sender_id]["lobby"]]
+	var recipient_id
+
+	if lobby["player_1"] == sender_id:
+		recipient_id = lobby["player_2"]
+	else:
+		recipient_id = lobby["player_1"]
+
+	send_data_as_JSON(recipient_id, data)
 
 func send_data_as_JSON(recipient_id, data) -> void:
 	peer.get_peer(recipient_id).put_packet((JSON.stringify(data).to_utf8_buffer()))

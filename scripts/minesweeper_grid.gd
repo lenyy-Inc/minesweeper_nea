@@ -205,9 +205,11 @@ func _input(event):
 		if (event.button_index == MOUSE_BUTTON_LEFT) and event.pressed:
 			print("left")
 			left_click_handler(tile_position)
+			input.emit(tile_position, true)
 		elif (event.button_index == MOUSE_BUTTON_RIGHT) and event.pressed:
 			print("right")
 			right_click_handler(tile_position)
+			input.emit(tile_position, false)
 
 func _process(delta):
 	pass

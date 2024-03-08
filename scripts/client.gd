@@ -7,6 +7,7 @@ enum Data{
 	wait,
 	lobby_id,
 	match_data,
+	demo,
 
 }
 
@@ -28,8 +29,12 @@ enum Modes{
 
 }
 
+const ip := "127.0.0.1"
+const port := "8915"
+
 #var window = JavaScriptBridge.get_interface("window")
 var peer = WebSocketMultiplayerPeer.new()
+var time_elapsed : float = 0
 
 #gotten from server
 var player_number: int = -1
@@ -50,16 +55,30 @@ var mine_number: int = 10
 var grid_width: int = 10
 var grid_height: int = 10
 
+var demo_dict:= {}
+
+signal end
 signal win
 signal lose
 signal opponent_tile_uncovered
+signal change_text
 
 func _ready():
 
 	#game_mode = window.game_mode
 	#username = window.username
+
+	get_window().size = Vector2i((64 * grid_height + 4), (64 * grid_width + 2))
+	display_as_background_text("Attempting to connect to server...")
 	initialise_game()
+	game_end()
+	display_as_background_text("game ended")
+	
+
 	pass
+
+func display_as_background_text(text : String) -> void:
+	change_text.emit(text)
 
 func send_data_as_JSON(data) -> void:
 	peer.put_packet(JSON.stringify(data).to_utf8_buffer())
@@ -70,10 +89,11 @@ func join_matchmaking() -> void:
 
 	var join_matchmaking_request = {
 
+		"id" : user_id,
 		"data_type" : Data.join_queue,
 		"username" : "test",
 		"elo" : elo,
-		"id" : user_id,
+		"game_mode" : game_mode,
 
 	}
 	send_data_as_JSON(join_matchmaking_request)
@@ -83,16 +103,30 @@ func send_win() -> void:
 
 	var win_data = {
 
+		"id" : user_id,
 		"data_type" : Data.match_data,
-		"match_data_type" : Match_Data.tile_uncovered,
+		"match_data_type" : Match_Data.win,
 
 	}
 	send_data_as_JSON(win_data)
+
+
+func send_loss() -> void:
+
+	var loss_data = {
+
+		"id" : user_id,
+		"data_type" : Data.match_data,
+		"match_data_type" : Match_Data.loss,
+
+	}
+	send_data_as_JSON(loss_data)
 
 func send_tile_uncovered(number_uncovered) -> void:
 
 	var tile_uncovered_update = {
 
+		"id" : user_id,
 		"data_type" : Data.match_data,
 		"match_data_type" : Match_Data.tile_uncovered,
 		"data" : number_uncovered,
@@ -100,19 +134,28 @@ func send_tile_uncovered(number_uncovered) -> void:
 	}
 	send_data_as_JSON(tile_uncovered_update)
 
-func send_loss() -> void:
 
-	var loss_data = {
+func write_demo(tile_position, is_left_click):
 
-		"data_type" : Data.match_data,
-		"match_data_type" : Match_Data.loss,
-		"id" : user_id,
+	var input
+
+	match is_left_click:
+
+		true:
+
+			input = "left_click"
+
+		_:
+
+			input = "right_click"
+
+
+	demo_dict[str(time_elapsed)] = {
+
+		"tile" : tile_position,
+		"input_type" : input,
 
 	}
-	send_data_as_JSON(loss_data)
-
-func write_demo(event):
-	pass
 
 func initialise_game() -> void:
 
@@ -179,39 +222,67 @@ func _process(delta):
 
 func handle_match_data(data):
 
-	var data_type: int = data["data_type"]
-	var int_elo: int
-	var int_id: int
+	var data_type: int = data["match_data_type"]
 
 	match data_type:
 
 		Match_Data.win:
 
-			pass
+			game_end()
+			pass_win()
 
 		Match_Data.loss:
-
-			pass
+			
+			game_end()
+			pass_lose()
 
 		Match_Data.tile_uncovered:
 
-			opponent_tile_uncovered.emit()
+			var tile_number: int = data["data"]
+			opponent_tile_uncovered.emit(tile_number)
 
 		_:
 
 			print("match_handler: nothing matched client")
 
+func parse_mine_coords_string(string) -> void:
+
+	var current_coords_x : String = ""
+	var current_coords_y : String = ""
+	var looking_at_x : bool = true
+
+	for i in string.length:
+		match string[i]:
+
+			"|":
+
+				looking_at_x = false
+				pass
+			
+			"&":
+
+				looking_at_x = true
+				mine_coords.append(Vector2i(int(current_coords_x), int(current_coords_y)))
+
+				current_coords_x = ""
+				current_coords_y = ""
+
+			_:
+
+				if looking_at_x:
+					current_coords_x += str(string[i])
+				else:
+					current_coords_x += str(string[i])
 
 func handle_data(data):
 
 	var data_type: int = data["data_type"]
-	var int_id: int
 
 	match data_type:
 
 		Data.user_id:
 
-			int_id = data["id"]
+			var int_id: int = data["id"]
 			user_id = int_id
 			print("my id is " + str(user_id))
 			join_matchmaking()
@@ -219,15 +290,16 @@ func handle_data(data):
 
 		Data.lobby_id:
 
-			int_id = data["id"]
+			var int_id: int = data["id"]
 			lobby_id = int_id
+			parse_mine_coords_string(data["mine_coords_string"])
+			initialise_game()
 			print("my lobby id is " + str(lobby_id) + " and user id is " + str(user_id))
 			
 
 		Data.wait:
 
-			#print("waited" + str(data["data"]))
-			pass
+			display_in_matchmaking(data["data"])
 
 		Data.match_data:
 
@@ -237,17 +309,30 @@ func handle_data(data):
 
 			print("data_handler: nothing matched client")
 
-func print_status(caller : String):
-
-	print("called by" + str(caller))
-	print("my id" + str(user_id))
-	print("lobby id" + str(lobby_id))
-
+func display_in_matchmaking(time_elapsed) -> void:
+	
+	var text:= "Matchmaking for " + str(int(time_elapsed)) + " seconds..."
+	change_text.emit(text)
 
 func connect_to_server() -> void:
 
-	peer.create_client("ws://127.0.0.1:8915")
+	peer.create_client("ws://" + ip + ":" + port)
 	print("client_started")
+
+func send_demo() -> void:
+
+	var demo = {
+
+		"id" : lobby_id,
+		"data_type" : Data.demo,
+		"data" : demo_dict,
+
+	}
+
+	send_data_as_JSON(demo_dict)
+
+func game_end() -> void:
+	end.emit()
 
 func pass_win() -> void:
 	win.emit()
@@ -259,8 +344,6 @@ func pass_lose() -> void:
 func _on_start_client_button_down():
 	
 	connect_to_server()
-
-
 
 func _on_send_test_packet_button_down():
 

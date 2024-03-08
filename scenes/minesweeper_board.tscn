@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://bu1gdr8kql3wa"]
+
+[ext_resource type="Texture2D" uid="uid://modnu5edpuy6" path="res://textures/alpha/hopefully good bg.png" id="1_4tjsl"]
+[ext_resource type="Script" path="res://scenes/boardparent.gd" id="2_43o0j"]
+[ext_resource type="PackedScene" uid="uid://bapiqrg6dx6rh" path="res://scenes/minesweeper_grid.tscn" id="3_qavdn"]
+
+[node name="background" type="Sprite2D"]
+position = Vector2(384, 448)
+texture = ExtResource("1_4tjsl")
+script = ExtResource("2_43o0j")
+
+[node name="TileMap" parent="." instance=ExtResource("3_qavdn")]
+position = Vector2(-320, -256)
